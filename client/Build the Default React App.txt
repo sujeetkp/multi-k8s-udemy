@@ -1,0 +1,5 @@
+1. Execute the below command to create the default react app.
+   
+   npx create-react-app client
+
+2. After that build the Docker image with the Dockerfile.dev

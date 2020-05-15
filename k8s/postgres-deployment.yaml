@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: postgres-deployment
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            component: postgres
+    template:
+        metadata:
+            name: postgres
+            labels:
+                component: postgres
+        spec:
+            volumes:
+                - name: postgres-storage                             # Name of the Volume
+                  persistentVolumeClaim:
+                    claimName: database-persistent-volume-claim      # Name of the PVC
+            containers:
+                - name: postgres
+                  image: postgres
+                  ports:
+                    - containerPort: 5432
+                  volumeMounts:
+                    - name: postgres-storage                         # Mapped to the Volume Name
+                      mountPath: /var/lib/postgresql/data            
+                      subPath: postgres
+                  env:
+                    - name: POSTGRES_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: pgpassword
+                          key: PGPASSWORD
+
+
+# mountPath: Path inside container to be mounted over the volume. Here "/var/lib/postgresql/data" 
+# is the default path where postgres stores all the data
+# subPath: Any data stored inside "mountPath" in the container will be stored in the "subPath" folder
+# inside the Volume. So here all the data written to "/var/lib/postgresql/data" inside the container will be
+# stored in a folder called "postgres" inside the PVC.
+# NOTE: This subPath bevaiour is specific to postgres.
