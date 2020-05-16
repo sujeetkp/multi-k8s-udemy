@@ -5,10 +5,30 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx                      # Using nginx class of ingress
     nginx.ingress.kubernetes.io/rewrite-target: /$1         # Replacing the Route Path Characters
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"      # Asking Ingress to use certificate from issuer "letsencrypt-prod" 
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'        # This redirects the traffics from http to https always.
 
 spec:
+  tls:
+    - hosts:                                                # HTTPS Traffic will be served on these hostnames.
+        - summitailabs.xyz
+        - www.summitailabs.xyz
+      secretName: summitailabs-xyz                          # Name of the Secret from which it has to get the Certificate from
+      
   rules:                                                    # Routing Rules
-    - http:                                                 # http routing rules
+    - host: summitailabs.xyz                                # Route the Traffic if it comes to this Host             
+      http:                                                 # http routing rules
+        paths:                                              # List of Routing Paths
+          - path: /?(.*)                                    # Path to be looked in the URL
+            backend:                                        # Backend details to which request will be routed to
+              serviceName: client-cluster-ip-service        # Backend Service to which the request will be routed to
+              servicePort: 3000                             # Service Port to which the request will be routed to
+          - path: /api/?(.*)
+            backend:
+              serviceName: server-cluster-ip-service
+              servicePort: 5000
+    - host: www.summitailabs.xyz                            # Route the Traffic if it comes to this Host             
+      http:                                                 # http routing rules
         paths:                                              # List of Routing Paths
           - path: /?(.*)                                    # Path to be looked in the URL
             backend:                                        # Backend details to which request will be routed to
