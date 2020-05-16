@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+    name: summitailabs-xyz-tls
+spec:
+    secretName: summitailabs-xyz     # This Secret will store the details about the certificate after obtained by the Cert Manager.
+    issuerRef:                       # Cert Manager automatically creates this Secret. Dont have to create manualy.
+        name: letsencrypt-prod       # Name of the Issuer         
+        kind: ClusterIssuer          # Kind of the Issuer
+    commonName: summitailabs.xyz     # Domain Name for which Certificate will be obtained.
+    dnsNames:                        # List of all the Domains that must be associated with the certificate.
+        - summitailabs.xyz
+        - www.summitailabs.xyz
+    acme:
+        config:
+            - http01: 
+                ingressClass: nginx 
+              domains:               # List of domains the verification process is gping to try to access before certifying.
+                - summitailabs.xyz    
+                - www.summitailabs.xyz
